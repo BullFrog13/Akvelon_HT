@@ -15,18 +15,21 @@ namespace UserService.Tests.UserService.WEB.Tests
     [TestFixture]
     public class CrudTests
     {
-        private Uri _serviceUri;
+        private const string ExecPath = "UserService.WEB\\bin\\debug\\UserService.WEB.exe";
+        private const string ServiceUri = "http://localhost:5000/UserService/Users";
+        private const string StubUserId = "1";
+        private const string JsonMediaType = "application/json";
+
         private Process _serviceProcess;
         private JavaScriptSerializer _jsonSerializer;
 
         [OneTimeSetUp]
         public void Setup()
         {
-            _serviceUri = new Uri("http://localhost:5000/UserService");
             _jsonSerializer = new JavaScriptSerializer();
             var test = Path.Combine(
-                Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..\\..\\..\\")),
-                "UserService.WEB\\bin\\debug\\UserService.WEB.exe");
+                Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..\\..\\..\\")), 
+                ExecPath);
 
             _serviceProcess = Process.Start(test);
         }
@@ -38,7 +41,7 @@ namespace UserService.Tests.UserService.WEB.Tests
 
             using (var httpClient = new HttpClient())
             {
-                responseMessage = await httpClient.GetAsync(_serviceUri);
+                responseMessage = await httpClient.GetAsync(ServiceUri);
             }
 
             Assert.That(responseMessage.StatusCode, Is.EqualTo(HttpStatusCode.OK));
@@ -55,15 +58,17 @@ namespace UserService.Tests.UserService.WEB.Tests
 
             using (var httpClient = new HttpClient())
             {
-                var createContent = new StringContent(JsonConvert.SerializeObject(userStub), Encoding.UTF8,
-                    "application/json");
-                await httpClient.PostAsync("http://localhost:5000/UserService/Users", createContent);
+                var createContent = new StringContent(
+                    JsonConvert.SerializeObject(userStub),
+                    Encoding.UTF8,
+                    JsonMediaType);
+                await httpClient.PostAsync(ServiceUri, createContent);
 
-                var getResponse = await httpClient.GetAsync("http://localhost:5000/UserService/Users/1");
+                var getResponse = await httpClient.GetAsync(ServiceUri + "/" + StubUserId);
 
                 Assert.That(getResponse.StatusCode, Is.EqualTo(HttpStatusCode.OK));
 
-                await httpClient.DeleteAsync("http://localhost:5000/UserService/Users/1");
+                await httpClient.DeleteAsync(ServiceUri + "/" + StubUserId);
             }
         }
 
@@ -85,19 +90,23 @@ namespace UserService.Tests.UserService.WEB.Tests
 
             using (var httpClient = new HttpClient())
             {
-                var createContent = new StringContent(JsonConvert.SerializeObject(userStub), Encoding.UTF8,
-                    "application/json");
-                var updateContent = new StringContent(JsonConvert.SerializeObject(updatedUserStub), Encoding.UTF8,
-                    "application/json");
-                await httpClient.PostAsync("http://localhost:5000/UserService/Users", createContent);
-                await httpClient.PutAsync("http://localhost:5000/UserService/Users", updateContent);
+                var createContent = new StringContent(
+                    JsonConvert.SerializeObject(userStub),
+                    Encoding.UTF8,
+                    JsonMediaType);
+                var updateContent = new StringContent(
+                    JsonConvert.SerializeObject(updatedUserStub),
+                    Encoding.UTF8,
+                    JsonMediaType);
 
-                var getResponse = await httpClient.GetAsync("http://localhost:5000/UserService/Users/1");
-                //var user = (User)_jsonSerializer.Deserialize(responseResult, typeof(User));
+                await httpClient.PostAsync(ServiceUri, createContent);
+                await httpClient.PutAsync(ServiceUri, updateContent);
+
+                var getResponse = await httpClient.GetAsync(ServiceUri + "/" + StubUserId);
 
                 Assert.That(getResponse.StatusCode, Is.EqualTo(HttpStatusCode.OK));
 
-                await httpClient.DeleteAsync("http://localhost:5000/UserService/Users/1");
+                await httpClient.DeleteAsync(ServiceUri + "/" + StubUserId);
             }
         }
 
@@ -112,12 +121,14 @@ namespace UserService.Tests.UserService.WEB.Tests
 
             using (var httpClient = new HttpClient())
             {
-                var createContent = new StringContent(JsonConvert.SerializeObject(userStub), Encoding.UTF8,
-                    "application/json");
-                await httpClient.PostAsync("http://localhost:5000/UserService/Users", createContent);
-                await httpClient.DeleteAsync("http://localhost:5000/UserService/Users/1");
+                var createContent = new StringContent(
+                    JsonConvert.SerializeObject(userStub),
+                    Encoding.UTF8,
+                    JsonMediaType);
+                await httpClient.PostAsync(ServiceUri, createContent);
+                await httpClient.DeleteAsync(ServiceUri + "/" + StubUserId);
 
-                var getResponse = await httpClient.GetAsync("http://localhost:5000/UserService/Users/1");
+                var getResponse = await httpClient.GetAsync(ServiceUri + "/" + StubUserId);
                 var responseResult = await getResponse.Content.ReadAsStringAsync();
                 var user = (User) _jsonSerializer.Deserialize(responseResult, typeof(User));
 

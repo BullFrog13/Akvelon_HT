@@ -12,10 +12,8 @@ namespace UserService.WEB
         {
             var httpUrl = new Uri("http://localhost:5000/UserService");
 
-            //Create ServiceHost
             _host = new ServiceHost(typeof(HttpServices.UserService), httpUrl);
 
-            //Enable metadata exchange
             var smb = new ServiceMetadataBehavior
             {
                 HttpGetEnabled = true,

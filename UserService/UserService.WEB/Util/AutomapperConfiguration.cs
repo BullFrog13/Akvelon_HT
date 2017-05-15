@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using UserService.BLL.Infrastructure.AutomapperRegistration;
+using UserService.BLL.Infrastructure.AutomapperProfiles;
 using UserService.WEB.Util.AutomapperProfiles;
 
 namespace UserService.WEB.Util
